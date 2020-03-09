@@ -25,7 +25,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
-    }
+    },
     "Watch": {
       "executablePath": "C:\\Program Files\\dotnet\\dotnet.exe",
       "commandLineArgs": "watch run",
