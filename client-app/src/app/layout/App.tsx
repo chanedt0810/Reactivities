@@ -1,12 +1,15 @@
-import React, { useState, useEffect, Fragment, SyntheticEvent } from 'react';
+import React, { useState, useEffect, Fragment, SyntheticEvent, useContext } from 'react';
 import { Container } from 'semantic-ui-react';
 import { IActivity } from '../models/activity';
 import { NavBar } from '../../features/nav/NavBar';
-import { ActivityDashboard } from '../../features/activities/dashboard/ActivityDashboard';
+import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
 import agent from '../api/agent';
 import { LoadingComponent } from './LoadingComponent';
+import ActivityStore from '../stores/activityStore';
+import { observer } from 'mobx-react-lite';
 
 const App = () => {
+	const activityStore = useContext(ActivityStore)
 	const [activities, setActivities] = useState<IActivity[]>([]);
 	const [selectedActivity, setSelectedActivity] = useState<IActivity | null>(null);
 	const [editMode, setEditMode] = useState(false);
@@ -51,18 +54,10 @@ const App = () => {
 	}
 
 	useEffect(() => {
-		agent.Activities.list()
-			.then((response) => {
-				let activities: IActivity[] = [];
-				response.forEach(activity => {
-					activity.date = activity.date.split('.')[0];
-					activities.push(activity);
-				})
-				setActivities(response);
-			}).then(() => setLoading(false));
-	}, []); // second param empty array stops useEffect from continuously running and only runs once NB this is because everytime component is rendered useEffect would be called
+		activityStore.loadActivities();
+	}, [activityStore]); // second param empty array stops useEffect from continuously running and only runs once NB this is because everytime component is rendered useEffect would be called
 
-	if (loading) {
+	if (activityStore.loadingInitial) {
 		return <LoadingComponent content='Loading activities...' />
 	}
 
@@ -71,7 +66,7 @@ const App = () => {
 			<NavBar openCreateForm={handleOpenCreateForm} />
 			<Container style={{ marginTop: '7em' }}>
 				<ActivityDashboard
-					activities={activities}
+					activities={activityStore.activities}
 					selectActivity={handleSelectActivity}
 					selectedActivity={selectedActivity}
 					editMode={editMode}
@@ -88,4 +83,4 @@ const App = () => {
 	);
 };
 
-export default App;
+export default observer(App);
